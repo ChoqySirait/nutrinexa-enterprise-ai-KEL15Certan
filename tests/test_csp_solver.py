@@ -11,6 +11,7 @@ def sample_recipes():
         Recipe("Salad Sayur Bening", 200, {"Wortel": 0.15}, [])
     ]
 
+
 def test_extreme_case_overconstrained_inventory(sample_recipes):
     """Kasus Ekstrem 1: Stok bahan baku 0 kg (Must Return None Instantly)."""
     inventory = {"Daging Ayam": 0.0, "Daging Sapi": 0.0, "Tahu": 0.0, "Wortel": 0.0}
@@ -20,6 +21,7 @@ def test_extreme_case_overconstrained_inventory(sample_recipes):
     csp = NutriNexaCSP(variables, domains, inventory, 1000, 2000, [], [])
     solution = backtracking_search(csp)
     assert solution is None
+
 
 def test_extreme_case_strict_allergen(sample_recipes):
     """Kasus Ekstrem 2: Alergi memangkas seluruh isi domain."""
