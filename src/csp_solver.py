@@ -45,9 +45,7 @@ class NutriNexaCSP:
                     valid_recipes.append(recipe)
             self.domains[var] = valid_recipes
 
-<<<<<<< HEAD
             
-=======
     def ac3(csp: NutriNexaCSP) -> bool:
     """
     Algoritma Arc Consistency (AC-3) untuk memangkas domain yang tidak konsisten.
@@ -93,4 +91,72 @@ def revise(csp: NutriNexaCSP, xi: str, xj: str) -> bool:
         csp.pruned_nodes_ac3 += 1
 
     return revised
->>>>>>> 13b319623919a75d1989f70de2f6315fa1ed9c53
+
+def select_unassigned_variable_mrv(assignment: Dict[str, Recipe], csp: NutriNexaCSP) -> str:
+    """Heuristik MRV (Minimum Remaining Values): Pilih variabel dengan sisa domain terkecil."""
+    unassigned = [v for v in csp.variables if v not in assignment]
+    return min(unassigned, key=lambda var: len(csp.domains[var]))
+
+
+def is_consistent(var: str, recipe: Recipe, assignment: Dict[str, Recipe], csp: NutriNexaCSP) -> bool:
+    """Memeriksa konsistensi penugasan 'recipe' ke 'var' terhadap seluruh batasan bisnis."""
+    temp_assignment = deepcopy(assignment)
+    temp_assignment[var] = recipe
+
+    # 1. Cek C4: Variasi Menu (Anti-Duplikasi)
+    assigned_names = [r.name for r in temp_assignment.values()]
+    if len(assigned_names) != len(set(assigned_names)):
+        return False
+
+    # 2. Cek C2: Akumulasi Stok Inventaris
+    total_used: Dict[str, float] = {}
+    for r in temp_assignment.values():
+        for ing, qty in r.ingredients.items():
+            total_used[ing] = total_used.get(ing, 0.0) + qty
+            if total_used[ing] > csp.inventory.get(ing, 0.0):
+                return False
+
+    # 3. Cek C3: Batas Kalori Maksimum
+    current_cal = sum(r.calories for r in temp_assignment.values())
+    if current_cal > csp.cal_max:
+        return False
+
+    # 4. Jika Seluruh Variabel Terisi, Cek Kalori Minimum & Bahan Kadaluarsa (C5)
+    if len(temp_assignment) == len(csp.variables):
+        if current_cal < csp.cal_min:
+            return False
+
+        used_ingredients = set(total_used.keys())
+        for exp_item in csp.expiring_items:
+            if exp_item in csp.inventory and csp.inventory[exp_item] > 0:
+                if exp_item not in used_ingredients or total_used[exp_item] <= 0:
+                    return False
+
+    return True
+
+
+def backtracking_search(csp: NutriNexaCSP) -> Optional[Dict[str, Recipe]]:
+    """Eksekusi utama pencarian Backtracking dipadu dengan AC-3 dan MRV."""
+    csp.enforce_unary_constraints()
+    if not ac3(csp):
+        return None  # Pra-pemrosesan AC-3 mendeteksi pertentangan batasan
+    return backtrack({}, csp)
+
+
+def backtrack(assignment: Dict[str, Recipe], csp: NutriNexaCSP) -> Optional[Dict[str, Recipe]]:
+    """Fungsi rekursif Backtracking."""
+    if len(assignment) == len(csp.variables):
+        return assignment
+
+    csp.backtrack_count += 1
+    var = select_unassigned_variable_mrv(assignment, csp)
+
+    for recipe in csp.domains[var]:
+        if is_consistent(var, recipe, assignment, csp):
+            assignment[var] = recipe
+            result = backtrack(assignment, csp)
+            if result is not None:
+                return result
+            del assignment[var]  # Backtracking
+
+    return None
