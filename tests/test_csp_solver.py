@@ -11,24 +11,24 @@ def sample_recipes():
         Recipe("Salad Sayur Bening", 200, {"Wortel": 0.15}, [])
     ]
 
-
 def test_extreme_case_overconstrained_inventory(sample_recipes):
-    """Kasus Ekstrem 1: Stok bahan baku 0 kg (Must Return None Instantly)."""
+    """Kasus Ekstrem 1: Stok bahan baku 0 kg (Over-constrained). Must Return None Instantly."""
     inventory = {"Daging Ayam": 0.0, "Daging Sapi": 0.0, "Tahu": 0.0, "Wortel": 0.0}
     variables = ['Makan_Pagi', 'Makan_Siang', 'Makan_Malam']
     domains = {v: list(sample_recipes) for v in variables}
     
     csp = NutriNexaCSP(variables, domains, inventory, 1000, 2000, [], [])
     solution = backtracking_search(csp)
-    assert solution is None
-
+    
+    assert solution is None  # Terbukti terkonvergensi gagal secara aman tanpa error
 
 def test_extreme_case_strict_allergen(sample_recipes):
-    """Kasus Ekstrem 2: Alergi memangkas seluruh isi domain."""
-    inventory = {"Daging Ayam": 1.0, "Daging Sapi": 1.0, "Tahu": 1.0, "Telur": 1.0}
+    """Kasus Ekstrem 2: Alergi memangkas seluruh isi domain variabel."""
+    inventory = {"Daging Ayam": 1.0, "Wortel": 1.0, "Tahu": 1.0, "Telur": 1.0}
     variables = ['Makan_Pagi']
-    domains = {'Makan_Pagi': [sample_recipes[2]]}
+    domains = {'Makan_Pagi': [sample_recipes[2]]}  # Hanya Omelet (Telur)
     
     csp = NutriNexaCSP(variables, domains, inventory, 200, 800, ["Telur"], [])
     solution = backtracking_search(csp)
+    
     assert solution is None

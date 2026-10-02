@@ -70,7 +70,7 @@ CERTAN-KEL-15/
 ├── .venv/               # Virtual environment otomatis dari Astral uv
 ├── docs/                # Berkas dokumentasi dan laporan teknis (PDF Milestone)
 │   ├── Grup15-Tugas01.pdf
-│   └── Grup15-Tugas02.pdf
+│   └──     .pdf
 ├── src/                 # Modul logika utama sistem
 │   ├── search_solver.py # Skrip Baseline A* Search Engine (Milestone 1)
 │   └── csp_solver.py    # Skrip CSP Optimization Engine AC-3 & MRV (Milestone 2)
