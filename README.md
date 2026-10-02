@@ -40,3 +40,86 @@ graph TD
     CSPSolver --> Output
     
     Output -.->|Response| UI
+
+```
+
+---
+
+## 🔄 Alur Kerja Sistem (System Workflow)
+1. Permintaan Pengguna: Pengguna atau pengelola katering memberikan request/konsultasi melalui antarmuka sistem (API Gateway/Gradio UI).
+
+2. Orkestrasi Agentic RAG: Agentic RAG Orchestrator menerima permintaan dan menentukan sumber daya atau algoritma yang dibutuhkan.
+
+3. Pencarian Pengetahuan (RAG): Knowledge Base / Vector DB menyediakan dokumen rujukan SOP gizi internal untuk menjamin validitas informasi.
+
+4. Ingestion Modul Input: Modul Input membaca data stok inventaris terstruktur (JSON/CSV) serta kustomisasi diet/alergi pengguna.
+
+5. Eksekusi Search & Optimasi:
+
+    - A Search (src/search_solver.py):* Menghitung rute substitusi bahan baku dengan biaya terendah.
+
+    - CSP Solver (src/csp_solver.py): Memangkas domain dengan AC-3 Arc Consistency dan mengeksekusi Backtracking MRV untuk memastikan kombinasi menu tidak melanggar  stok fisik, batas kalori, maupun alergi.
+
+6. Umpan Balik (Response): Hasil rekomendasi resep zero-waste dan rincian gizi dikembalikan ke antarmuka pengguna secara instan.
+
+---
+
+## 🛠 Struktur Direktori Proyek
+``` 
+CERTAN-KEL-15/
+├── .venv/               # Virtual environment otomatis dari Astral uv
+├── docs/                # Berkas dokumentasi dan laporan teknis (PDF Milestone)
+│   ├── Grup15-Tugas01.pdf
+│   └── Grup15-Tugas02.pdf
+├── src/                 # Modul logika utama sistem
+│   ├── search_solver.py # Skrip Baseline A* Search Engine (Milestone 1)
+│   └── csp_solver.py    # Skrip CSP Optimization Engine AC-3 & MRV (Milestone 2)
+├── tests/               # Berkas pengujian unit otomatis (pytest)
+│   ├── test_search_solver.py # Pengujian unit A* Search
+│   └── test_csp_solver.py    # Pengujian unit CSP & Kasus Ekstrem
+├── .gitignore           # Konfigurasi pengisolasian file git
+├── LICENSE              # Lisensi proyek (MIT License)
+├── pyproject.toml       # Manifest dependensi Astral uv
+├── README.md            # Dokumentasi utama repositori
+└── uv.lock              # Berkas kunci versi dependensi uv
+```
+
+--- 
+
+## 🚀 Setup & Eksekusi Proyek
+Proyek ini mengadopsi manajer paket modern **Astral uv**
+
+1. Clone Repositori
+
+```
+git clone [https://github.com/ChoqySirait/nutrinexa-enterprise-ai-KEL15Certan.git](https://github.com/ChoqySirait/nutrinexa-enterprise-ai-KEL15Certan.git)
+cd nutrinexa-enterprise-ai-KEL15Certan
+```
+
+---
+
+2. Sinkronisasi Dependensi
+
+```
+uv sync
+```
+
+---
+
+3. Menjalankan Skrip Baseline A* Search
+
+```
+uv run src/search_solver.py
+```
+
+---
+
+
+4. Menjalankan Seluruh Pengujian Unit Otomatis (pytest)
+
+```
+uv run pytest
+```
+
+---
+
