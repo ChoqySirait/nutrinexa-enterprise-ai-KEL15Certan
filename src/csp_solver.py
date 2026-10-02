@@ -44,3 +44,49 @@ class NutriNexaCSP:
                 if not self.user_allergens.intersection(set(recipe.allergens)):
                     valid_recipes.append(recipe)
             self.domains[var] = valid_recipes
+
+    def ac3(csp: NutriNexaCSP) -> bool:
+    """
+    Algoritma Arc Consistency (AC-3) untuk memangkas domain yang tidak konsisten.
+    """
+    queue: List[Tuple[str, str]] = [(xi, xj) for xi in csp.variables for xj in csp.variables if xi != xj]
+
+    while queue:
+        xi, xj = queue.pop(0)
+        if revise(csp, xi, xj):
+            if len(csp.domains[xi]) == 0:
+                return False  # Domain kosong: Tidak ada solusi yang memenuhi batasan
+            for xk in csp.variables:
+                if xk != xi and xk != xj:
+                    queue.append((xk, xi))
+    return True
+
+
+def revise(csp: NutriNexaCSP, xi: str, xj: str) -> bool:
+    """Revisi domain Xi jika tidak ada nilai di Xj yang mendukung batasan C2 dan C4."""
+    revised = False
+    to_remove = []
+
+    for r_i in csp.domains[xi]:
+        has_support = False
+        for r_j in csp.domains[xj]:
+            if r_i.name != r_j.name:  # C4: Variasi Menu
+                valid_stock = True
+                for ing, qty in r_i.ingredients.items():
+                    total_req = qty + r_j.ingredients.get(ing, 0.0)
+                    if total_req > csp.inventory.get(ing, 0.0):  # C2: Batas Stok
+                        valid_stock = False
+                        break
+                if valid_stock:
+                    has_support = True
+                    break
+
+        if not has_support:
+            to_remove.append(r_i)
+            revised = True
+
+    for r in to_remove:
+        csp.domains[xi].remove(r)
+        csp.pruned_nodes_ac3 += 1
+
+    return revised
