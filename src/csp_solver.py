@@ -45,8 +45,8 @@ class NutriNexaCSP:
                     valid_recipes.append(recipe)
             self.domains[var] = valid_recipes
 
-            
-    def ac3(csp: NutriNexaCSP) -> bool:
+
+def ac3(csp: NutriNexaCSP) -> bool:
     """
     Algoritma Arc Consistency (AC-3) untuk memangkas domain yang tidak konsisten.
     """
@@ -91,6 +91,7 @@ def revise(csp: NutriNexaCSP, xi: str, xj: str) -> bool:
         csp.pruned_nodes_ac3 += 1
 
     return revised
+
 
 def select_unassigned_variable_mrv(assignment: Dict[str, Recipe], csp: NutriNexaCSP) -> str:
     """Heuristik MRV (Minimum Remaining Values): Pilih variabel dengan sisa domain terkecil."""
@@ -160,3 +161,36 @@ def backtrack(assignment: Dict[str, Recipe], csp: NutriNexaCSP) -> Optional[Dict
             del assignment[var]  # Backtracking
 
     return None
+
+
+if __name__ == "__main__":
+    # Pengujian Sederhana Langsung saat File Dijalankan
+    recipes = [
+        Recipe("Sup Ayam Wortel", 400, {"Daging Ayam": 0.2, "Wortel": 0.1}, []),
+        Recipe("Tumis Daging Sapi", 550, {"Daging Sapi": 0.2, "Wortel": 0.1}, []),
+        Recipe("Omelet Tahu Bayam", 350, {"Tahu": 0.15, "Telur": 0.1}, ["Telur"]),
+        Recipe("Ayam Bumbu Kecap", 500, {"Daging Ayam": 0.25}, []),
+        Recipe("Salad Sayur Bening", 200, {"Wortel": 0.15}, [])
+    ]
+    
+    stok_dapur = {"Daging Ayam": 1.0, "Daging Sapi": 1.0, "Wortel": 0.5, "Tahu": 0.5, "Telur": 0.5}
+    variables = ['Makan_Pagi', 'Makan_Siang', 'Makan_Malam']
+    domains = {v: list(recipes) for v in variables}
+    
+    csp = NutriNexaCSP(
+        variables=variables,
+        domains=domains,
+        inventory=stok_dapur,
+        cal_min=1000,
+        cal_max=2000,
+        user_allergens=["Telur"],
+        expiring_items=["Daging Ayam"]
+    )
+    
+    solusi = backtracking_search(csp)
+    print("- HASIL REKOMENDASI MENU CSP NUTRINEXA -")
+    if solusi:
+        for slot, resep in solusi.items():
+            print(f"{slot}: {resep.name} ({resep.calories} kcal)")
+    else:
+        print("Tidak ditemukan kombinasi resep yang memenuhi seluruh batasan.")
