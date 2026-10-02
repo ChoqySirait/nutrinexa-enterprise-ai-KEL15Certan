@@ -44,3 +44,5 @@ class NutriNexaCSP:
                 if not self.user_allergens.intersection(set(recipe.allergens)):
                     valid_recipes.append(recipe)
             self.domains[var] = valid_recipes
+
+            
