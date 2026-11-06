@@ -20,13 +20,18 @@ def a_star_search(start, goal):
     """
     Algoritma A* Search untuk Baseline Search NutriNexa (Milestone 1)
     """
+    if start not in heuristic or goal not in heuristic:
+        raise ValueError(
+            f"Simpul awal '{start}' atau simpul tujuan '{goal}' tidak valid dalam ruang pencarian."
+        )
+
     pq = []
     # (f_score, g_score, current_node, path)
     heapq.heappush(pq, (heuristic[start], 0, start, [start]))
     visited = {}
 
     while pq:
-        f_score, g_score, current, path = heapq.heappop(pq)
+        _f_score, g_score, current, path = heapq.heappop(pq)
 
         if current == goal:
             return path, g_score
@@ -36,6 +41,10 @@ def a_star_search(start, goal):
         visited[current] = g_score
 
         for neighbor, cost in graph.get(current, []):
+            if neighbor not in heuristic:
+                raise ValueError(
+                    f"Simpul tetangga '{neighbor}' tidak valid dalam ruang pencarian."
+                )
             tentative_g = g_score + cost
             tentative_f = tentative_g + heuristic[neighbor]
             heapq.heappush(pq, (tentative_f, tentative_g, neighbor, path + [neighbor]))
