@@ -23,5 +23,6 @@ dist/
 *.egg-info/
 
 # Local vector database
-storage/chroma_db/
+storage/
 data/chroma_db/
+

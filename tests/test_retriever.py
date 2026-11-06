@@ -130,3 +130,65 @@ def test_retriever_empty_query_validation(retriever_setup):
     with pytest.raises(ValueError, match="minimal bernilai 1"):
         retriever.retrieve("kueri valid", top_k=0)
 
+
+def test_retriever_min_similarity_threshold(retriever_setup):
+    """Menguji penyaringan hasil kueri dengan ambang batas min_similarity."""
+    retriever, _, _ = retriever_setup
+
+    # Kueri 'resep daging ayam' menghasilkan doc_ayam dengan similarity ~1.0, lainnya ~0.0
+    # Jika min_similarity = 0.5, hanya dokumen ayam yang harus lolos
+    filtered_results = retriever.retrieve("resep daging ayam", top_k=5, min_similarity=0.5)
+    assert len(filtered_results) == 1
+    assert filtered_results[0].chunk_id == "doc_ayam_1"
+    assert filtered_results[0].rank == 1
+    assert filtered_results[0].similarity >= 0.5
+
+    # Jika min_similarity = 1.1 (di luar rentang), harus raise ValueError
+    with pytest.raises(ValueError, match="min_similarity"):
+        retriever.retrieve("resep daging ayam", min_similarity=1.5)
+
+    with pytest.raises(ValueError, match="min_similarity"):
+        retriever.retrieve("resep daging ayam", min_similarity=-0.1)
+
+    # Jika ambang batas sangat tinggi dan tidak ada yang lolos
+    high_threshold_results = retriever.retrieve("resep daging ayam", min_similarity=0.999999)
+    # Jika doc_ayam lolos atau tidak lolos, semua hasil harus >= 0.999999
+    for r in high_threshold_results:
+        assert r.similarity >= 0.999999
+
+
+def test_retriever_mmr_diversity_reranking(retriever_setup):
+    """Menguji bahwa MMR re-ranking mendiversifikasi dokumen yang dikembalikan."""
+    retriever, store, engine = retriever_setup
+
+    # Tambahkan dokumen ayam kedua yang sangat mirip
+    extra_chunks = [
+        DocumentChunk(
+            chunk_id="doc_ayam_2",
+            text="SOP Pengolahan Daging Ayam Potong Restoran",
+            metadata={"source_id": "SOP-AYAM", "chunk_index": 1, "category": "poultry"},
+        )
+    ]
+    embs = engine.embed_chunks(extra_chunks)
+    store.add_chunks(extra_chunks, [e.embedding for e in embs])
+
+    # Tes invalid mmr_lambda
+    with pytest.raises(ValueError, match="mmr_lambda"):
+        retriever.retrieve("resep ayam", enable_mmr=True, mmr_lambda=1.5)
+
+    # Tanpa MMR: dokumen ayam 1 dan ayam 2 yang mirip akan mendominasi top 2
+    standard_res = retriever.retrieve("resep ayam", top_k=2, enable_mmr=False)
+    standard_ids = [r.chunk_id for r in standard_res]
+    assert "doc_ayam_1" in standard_ids
+
+    # Dengan MMR (lambda rendah untuk diversifikasi maksimal):
+    # Dokumen pertama tetap yang paling relevan (ayam), tapi dokumen kedua memilih yang berbeda (ikan/sayur)
+    mmr_res = retriever.retrieve("resep ayam", top_k=2, enable_mmr=True, mmr_lambda=0.1)
+    assert len(mmr_res) == 2
+    assert mmr_res[0].chunk_id.startswith("doc_ayam")
+    # Dokumen kedua harus bukan doc_ayam lainnya karena penalti kemiripan antar dokumen terpilih
+    assert mmr_res[1].chunk_id in ("doc_ikan_1", "doc_sayur_1")
+    assert mmr_res[0].rank == 1
+    assert mmr_res[1].rank == 2
+
+

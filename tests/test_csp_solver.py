@@ -158,3 +158,22 @@ def test_extreme_case_strict_allergen(sample_recipes):
     solution = backtracking_search(csp)
 
     assert solution is None
+
+
+def test_order_domain_values_lcv_prioritizes_expiring_items(sample_recipes):
+    """Menguji bahwa heuristik LCV menaruh resep yang memanfaatkan expiring_items di posisi pertama."""
+    from src.csp_solver import order_domain_values_lcv
+
+    inventory = {"Daging Ayam": 1.0, "Daging Sapi": 1.0, "Wortel": 1.0, "Tahu": 1.0, "Telur": 1.0}
+    variables = ['Makan_Pagi', 'Makan_Siang']
+    domains = {v: list(sample_recipes) for v in variables}
+
+    # Set Daging Sapi sebagai expiring
+    csp = NutriNexaCSP(variables, domains, inventory, 500, 2000, ["Telur"], ["Daging Sapi"])
+    csp.enforce_unary_constraints()
+
+    ordered = order_domain_values_lcv('Makan_Pagi', {}, csp)
+    # Resep yang mengandung Daging Sapi (Tumis Daging Sapi) harus berada di urutan pertama
+    assert "Daging Sapi" in ordered[0].ingredients
+    assert ordered[0].name == "Tumis Daging Sapi"
+

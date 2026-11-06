@@ -138,6 +138,51 @@ def is_consistent(var: str, recipe: Recipe, assignment: dict[str, Recipe], csp: 
     return True
 
 
+def order_domain_values_lcv(var: str, assignment: dict[str, Recipe], csp: NutriNexaCSP) -> list[Recipe]:
+    """
+    Heuristik LCV (Least Constraining Value) dipadukan dengan prioritas Zero-Waste.
+    Mengurutkan nilai domain agar:
+    1. Resep yang memanfaatkan bahan hampir kedaluwarsa (expiring_items) diprioritaskan lebih dulu.
+    2. Resep yang menyisakan fleksibilitas pilihan tertinggi (paling sedikit membatasi domain variabel lain) dipilih lebih awal.
+    """
+    unassigned = [v for v in csp.variables if v not in assignment and v != var]
+    if not unassigned:
+        return sorted(
+            csp.domains[var],
+            key=lambda r: sum(1 for exp in csp.expiring_items if exp in r.ingredients and r.ingredients[exp] > 0),
+            reverse=True,
+        )
+
+    current_used: dict[str, float] = {}
+    for r in assignment.values():
+        for ing, qty in r.ingredients.items():
+            current_used[ing] = current_used.get(ing, 0.0) + qty
+
+    def score_recipe(recipe: Recipe) -> tuple[int, int]:
+        exp_score = sum(1 for exp in csp.expiring_items if exp in recipe.ingredients and recipe.ingredients[exp] > 0)
+
+        simulated_used = dict(current_used)
+        for ing, qty in recipe.ingredients.items():
+            simulated_used[ing] = simulated_used.get(ing, 0.0) + qty
+
+        eliminated = 0
+        assigned_names = {r.name for r in assignment.values()} | {recipe.name}
+        for other_var in unassigned:
+            for other_recipe in csp.domains[other_var]:
+                if other_recipe.name in assigned_names:
+                    eliminated += 1
+                    continue
+                for ing, qty in other_recipe.ingredients.items():
+                    if simulated_used.get(ing, 0.0) + qty > csp.inventory.get(ing, 0.0):
+                        eliminated += 1
+                        break
+
+        # Memaksimalkan exp_score dan meminimalkan eliminated (LCV)
+        return (exp_score, -eliminated)
+
+    return sorted(csp.domains[var], key=score_recipe, reverse=True)
+
+
 def backtracking_search(csp: NutriNexaCSP) -> dict[str, Recipe] | None:
     """Eksekusi utama pencarian Backtracking dipadu dengan AC-3 dan MRV."""
     csp.enforce_unary_constraints()
@@ -147,14 +192,14 @@ def backtracking_search(csp: NutriNexaCSP) -> dict[str, Recipe] | None:
 
 
 def backtrack(assignment: dict[str, Recipe], csp: NutriNexaCSP) -> dict[str, Recipe] | None:
-    """Fungsi rekursif Backtracking."""
+    """Fungsi rekursif Backtracking dengan pemesanan domain LCV & Zero-Waste."""
     if len(assignment) == len(csp.variables):
         return assignment
 
     csp.backtrack_count += 1
     var = select_unassigned_variable_mrv(assignment, csp)
 
-    for recipe in csp.domains[var]:
+    for recipe in order_domain_values_lcv(var, assignment, csp):
         if is_consistent(var, recipe, assignment, csp):
             assignment[var] = recipe
             result = backtrack(assignment, csp)

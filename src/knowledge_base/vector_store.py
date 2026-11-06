@@ -172,6 +172,7 @@ class ChromaVectorStore:
         query_embedding: list[float],
         top_k: int = 5,
         where: dict[str, Any] | None = None,
+        include: list[str] | None = None,
     ) -> dict[str, Any]:
         """
         Melakukan pencarian kemiripan kosinus terhadap koleksi ChromaDB.
@@ -186,10 +187,11 @@ class ChromaVectorStore:
         if top_k < 1:
             raise ValueError("Nilai `top_k` minimal bernilai 1.")
 
+        include_fields = include if include is not None else ["documents", "metadatas", "distances"]
         kwargs: dict[str, Any] = {
             "query_embeddings": [query_embedding],
             "n_results": top_k,
-            "include": ["documents", "metadatas", "distances"],
+            "include": include_fields,
         }
         if where:
             kwargs["where"] = where

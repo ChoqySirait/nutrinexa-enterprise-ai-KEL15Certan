@@ -64,3 +64,49 @@ def test_a_star_search_unknown_nodes_raise_value_error():
 
     with pytest.raises(ValueError, match="tidak valid dalam ruang pencarian"):
         a_star_search('Bahan_Awal', 'Simpul_Fiktif')
+
+
+def test_build_food_substitution_graph_and_dynamic_search():
+    """Menguji pembuatan graf pangan nyata dinamis dan pencarian rute substitusi dengan A*."""
+    from src.search_solver import (
+        DEFAULT_FOOD_CATALOG,
+        build_food_substitution_graph,
+        calculate_substitution_cost,
+    )
+
+    # 1. Uji kalkulasi biaya substitusi
+    cost = calculate_substitution_cost('Daging Sapi', 'Tempe')
+    assert cost > 0
+
+    with pytest.raises(ValueError, match="tidak terdaftar"):
+        calculate_substitution_cost('Bahan_Aneh', 'Tempe')
+
+    # 2. Bangun graf substitusi: Daging Sapi -> Daging Ayam -> Tempe -> Target Gizi Seimbang
+    edges = [
+        ('Daging Sapi', 'Daging Ayam'),
+        ('Daging Sapi', 'Tempe'),
+        ('Daging Ayam', 'Target Gizi Seimbang'),
+        ('Tempe', 'Target Gizi Seimbang'),
+    ]
+    food_graph, food_heuristic = build_food_substitution_graph(
+        edges=edges,
+        target_node='Target Gizi Seimbang',
+    )
+
+    assert 'Daging Sapi' in food_graph
+    assert food_heuristic['Target Gizi Seimbang'] == 0.0
+
+    # 3. Jalankan pencarian A* pada graf pangan dinamis
+    path, total_cost = a_star_search(
+        start='Daging Sapi',
+        goal='Target Gizi Seimbang',
+        custom_graph=food_graph,
+        custom_heuristic=food_heuristic,
+    )
+
+    assert path is not None
+    assert path[0] == 'Daging Sapi'
+    assert path[-1] == 'Target Gizi Seimbang'
+    assert total_cost > 0
+    assert total_cost < float('inf')
+
