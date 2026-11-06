@@ -200,3 +200,4 @@ class EmbeddingEngine:
             raise ValueError("Daftar DocumentChunk tidak boleh kosong.")
         texts = [c.text for c in chunks]
         return self.embed_documents(texts)
+    
