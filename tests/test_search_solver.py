@@ -74,7 +74,11 @@ def test_build_food_substitution_graph_and_dynamic_search():
         calculate_substitution_cost,
     )
 
-    # 1. Uji kalkulasi biaya substitusi
+    # 1. Uji katalog bahan pangan riil
+    assert "Daging Sapi" in DEFAULT_FOOD_CATALOG
+    assert "Tempe" in DEFAULT_FOOD_CATALOG
+
+    # 2. Uji kalkulasi biaya substitusi
     cost = calculate_substitution_cost('Daging Sapi', 'Tempe')
     assert cost > 0
 

@@ -9,14 +9,14 @@ from __future__ import annotations
 import logging
 from typing import Any
 
+import numpy as np
+
 from src.knowledge_base.embedding_engine import EmbeddingEngine
 from src.knowledge_base.schemas import (
     RetrievalResult,
     RetrieverError,
 )
 from src.knowledge_base.vector_store import ChromaVectorStore
-
-import numpy as np
 
 logger = logging.getLogger(__name__)
 

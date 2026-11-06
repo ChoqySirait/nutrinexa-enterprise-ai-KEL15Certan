@@ -1,0 +1,52 @@
+{
+  "corpus_total_chunks": 51,
+  "calibration_queries_count": 10,
+  "held_out_evaluation_queries_count": 35,
+  "in_domain_queries_count": 23,
+  "out_of_distribution_queries_count": 12,
+  "three_way_threshold_bands": {
+    "reject_below": 0.84,
+    "abstain_lower": 0.84,
+    "abstain_upper": 0.855,
+    "accept_above": 0.855
+  },
+  "hit_at_1_macro": 0.913,
+  "hit_at_3_macro": 1.0,
+  "hit_at_5_macro": 1.0,
+  "document_recall_at_1_macro": 0.7971,
+  "document_recall_at_1_micro": 0.7241,
+  "document_recall_at_5_macro": 1.0,
+  "document_recall_at_5_micro": 1.0,
+  "chunk_precision_at_5_macro": 0.5478,
+  "document_precision_at_5_macro": 0.2522,
+  "mean_reciprocal_rank_mrr_macro": 0.9493,
+  "ood_three_way_decision_breakdown": {
+    "ood_total_queries": 12,
+    "ood_true_rejections_count": 10,
+    "ood_true_rejection_rate_trr": 0.8333,
+    "ood_abstentions_count": 2,
+    "ood_abstention_rate": 0.1667,
+    "ood_false_acceptances_count": 0,
+    "ood_false_acceptance_rate_far": 0.0,
+    "in_domain_total_queries": 23,
+    "in_domain_true_acceptances_count": 23,
+    "in_domain_true_acceptance_rate_tar": 1.0,
+    "in_domain_abstentions_count": 0,
+    "in_domain_abstention_rate": 0.0,
+    "in_domain_false_rejections_count": 0,
+    "in_domain_false_rejection_rate_frr": 0.0,
+    "total_abstentions_count": 2,
+    "total_abstention_rate": 0.0571,
+    "total_decisive_accuracy_rate": 0.9429
+  },
+  "latency_profiles_ms": {
+    "model_loading_time_ms": 17482.57,
+    "first_query_warmup_ms": 37.6,
+    "total_cold_start_ms": 17520.17,
+    "warm_latency_mean_ms": 31.45,
+    "warm_latency_median_p50_ms": 30.29,
+    "warm_latency_min_ms": 26.8,
+    "warm_latency_max_ms": 41.67,
+    "warm_latency_p95_ms": 38.59
+  }
+}

@@ -141,3 +141,42 @@ def test_chroma_vector_store_input_validation(tmp_path):
 
     with pytest.raises(VectorStoreError, match="Dimensi query embedding"):
         store.search(query_embedding=[0.1, 0.2])
+
+    with pytest.raises(ValueError, match="batch_size"):
+        store.add_chunks([chunk], [create_deterministic_embedding(0.1)], batch_size=0)
+
+
+def test_replace_source_documents_validation_and_data_preservation(tmp_path):
+    """Menguji bahwa replace_source_documents memvalidasi konsistensi source_id dan tidak menghapus data jika validasi gagal."""
+    store = ChromaVectorStore(persist_directory=tmp_path / "db", collection_name="test_replace_val")
+
+    orig_chunk = create_sample_chunk("orig_1", "Dokumen Awal Asli", source_id="DOC-STABLE")
+    store.add_chunks([orig_chunk], [create_deterministic_embedding(0.5)])
+    assert store.count() == 1
+
+    # 1. Coba ganti dengan chunk yang memiliki source_id berbeda ("DOC-MISMATCH" vs "DOC-STABLE")
+    bad_chunk = create_sample_chunk("bad_1", "Dokumen Baru Salah Source", source_id="DOC-MISMATCH")
+    with pytest.raises(ValueError, match="Inkonsistensi source_id"):
+        store.replace_source_documents(
+            source_id="DOC-STABLE",
+            chunks=[bad_chunk],
+            embeddings=[create_deterministic_embedding(0.5)],
+        )
+
+    # Pastikan data asli TIDAK terhapus karena validasi gagal di awal!
+    assert store.count() == 1
+    res = store.search(query_embedding=create_deterministic_embedding(0.5), top_k=1)
+    assert res["ids"][0][0] == "orig_1"
+
+    # 2. Coba ganti dengan dimensi embedding yang salah
+    valid_id_chunk = create_sample_chunk("new_1", "Dokumen Baru Dimensi Salah", source_id="DOC-STABLE")
+    with pytest.raises(VectorStoreError, match="Dimensi vektor"):
+        store.replace_source_documents(
+            source_id="DOC-STABLE",
+            chunks=[valid_id_chunk],
+            embeddings=[[0.1, 0.2]],
+        )
+
+    # Pastikan data asli tetap utuh
+    assert store.count() == 1
+

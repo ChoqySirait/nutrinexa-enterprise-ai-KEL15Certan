@@ -102,27 +102,27 @@ class ChromaVectorStore:
             raise ValueError(
                 f"Jumlah chunk ({len(chunks)}) tidak sepadan dengan jumlah embedding ({len(embeddings)})."
             )
+        if not isinstance(batch_size, int) or batch_size < 1:
+            raise ValueError("`batch_size` harus berupa integer positif (>= 1).")
+
+        # Validasi seluruh chunk dan dimensi embedding terlebih dahulu sebelum operasi I/O
+        for idx, (chunk, emb) in enumerate(zip(chunks, embeddings, strict=True)):
+            if not isinstance(chunk, DocumentChunk):
+                raise TypeError(f"Elemen pada indeks {idx} bukan merupakan instance DocumentChunk.")
+            if not isinstance(emb, list) or len(emb) != self.expected_dim:
+                raise VectorStoreError(
+                    f"Dimensi vektor ({len(emb) if isinstance(emb, list) else type(emb)}) pada chunk '{chunk.chunk_id}' "
+                    f"tidak sesuai dengan dimensi koleksi ({self.expected_dim})."
+                )
 
         total_chunks = len(chunks)
         for i in range(0, total_chunks, batch_size):
             batch_chunks = chunks[i : i + batch_size]
             batch_embeddings = embeddings[i : i + batch_size]
 
-            ids: list[str] = []
-            documents: list[str] = []
-            metadatas: list[dict[str, Any]] = []
-
-            for chunk, emb in zip(batch_chunks, batch_embeddings, strict=True):
-                # Validasi dimensi vektor embedding
-                if len(emb) != self.expected_dim:
-                    raise VectorStoreError(
-                        f"Dimensi vektor ({len(emb)}) pada chunk '{chunk.chunk_id}' "
-                        f"tidak sesuai dengan dimensi koleksi ({self.expected_dim})."
-                    )
-
-                ids.append(chunk.chunk_id)
-                documents.append(chunk.text)
-                metadatas.append(dict(chunk.metadata))
+            ids: list[str] = [c.chunk_id for c in batch_chunks]
+            documents: list[str] = [c.text for c in batch_chunks]
+            metadatas: list[dict[str, Any]] = [dict(c.metadata) for c in batch_chunks]
 
             try:
                 self.collection.upsert(
@@ -161,10 +161,45 @@ class ChromaVectorStore:
         batch_size: int = 100,
     ) -> int:
         """
-        Operasi atomik untuk memperbarui revisi dokumen:
-        Menghapus seluruh versi chunk lama berdasarkan `source_id`, lalu memasukkan chunk baru.
+        Operasi penggantian dokumen terstruktur (sequential replacement workflow):
+        1. Memvalidasi konsistensi source_id pada seluruh chunk dan dimensi embedding.
+        2. Jika seluruh data valid, menghapus chunk versi lama berdasarkan source_id.
+        3. Memasukkan kumpulan chunk baru secara batching.
+        Catatan: ChromaDB tidak mendukung transaksi multi-langkah ACID / 2PC secara native,
+        sehingga validasi ketat dilakukan di awal sebelum penghapusan data lama dimulai.
         """
-        self.delete_by_source(source_id)
+        if not isinstance(source_id, str) or not source_id.strip():
+            raise ValueError("Parameter `source_id` wajib berupa string non-kosong.")
+        if not isinstance(chunks, list) or len(chunks) == 0:
+            raise ValueError("Daftar DocumentChunk untuk penggantian tidak boleh kosong.")
+        if not isinstance(embeddings, list) or len(embeddings) == 0:
+            raise ValueError("Daftar embeddings untuk penggantian tidak boleh kosong.")
+        if len(chunks) != len(embeddings):
+            raise ValueError(
+                f"Jumlah chunk ({len(chunks)}) tidak sepadan dengan jumlah embedding ({len(embeddings)})."
+            )
+        if not isinstance(batch_size, int) or batch_size < 1:
+            raise ValueError("`batch_size` harus berupa integer positif (>= 1).")
+
+        # Validasi konsistensi source_id dan tipe data pada seluruh chunk sebelum mengubah database
+        cleaned_source_id = source_id.strip()
+        for idx, (chunk, emb) in enumerate(zip(chunks, embeddings, strict=True)):
+            if not isinstance(chunk, DocumentChunk):
+                raise TypeError(f"Elemen pada indeks {idx} bukan merupakan instance DocumentChunk.")
+            chunk_src = chunk.metadata.get("source_id")
+            if chunk_src != cleaned_source_id:
+                raise ValueError(
+                    f"Inkonsistensi source_id pada chunk '{chunk.chunk_id}' (indeks {idx}): "
+                    f"ditemukan '{chunk_src}', diharapkan '{cleaned_source_id}'."
+                )
+            if not isinstance(emb, list) or len(emb) != self.expected_dim:
+                raise VectorStoreError(
+                    f"Dimensi vektor ({len(emb) if isinstance(emb, list) else type(emb)}) pada chunk '{chunk.chunk_id}' "
+                    f"tidak sesuai dengan dimensi koleksi ({self.expected_dim})."
+                )
+
+        # Hapus versi lama dan masukkan versi baru
+        self.delete_by_source(cleaned_source_id)
         return self.add_chunks(chunks, embeddings, batch_size=batch_size)
 
     def search(

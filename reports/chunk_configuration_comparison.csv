@@ -1,0 +1,4 @@
+config_name,chunk_size_words,chunk_overlap_words,total_chunks,empty_chunks,duplicate_ids,token_min,token_mean,token_median,token_p95,token_max,boundary_preservation_pct,hit_at_1_pct,hit_at_3_pct,hit_at_5_pct,mrr,latency_mean_ms,latency_p95_ms
+Config_A (150w/30ov),150,30,50,0,0,82,218.1,222.0,309.3,326,94.0,100.0,100.0,100.0,1.0,36.57,52.49
+Config_B (200w/35ov),200,35,41,0,0,103,260.1,260.0,362.0,451,92.7,100.0,100.0,100.0,1.0,41.11,52.18
+Config_C (250w/40ov),250,40,32,0,0,174,318.3,322.0,455.8,483,93.8,93.3,100.0,100.0,0.9667,25.91,29.77

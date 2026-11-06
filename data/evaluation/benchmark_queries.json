@@ -1,0 +1,574 @@
+{
+  "benchmark_version": "3.0.0",
+  "description": "Dataset evaluasi benchmark 3-split tanpa kebocoran data (15 tuning pengembangan, 10 kalibrasi threshold, 35 evaluasi final held-out).",
+  "splits": {
+    "development_tuning_queries": {
+      "count": 15,
+      "purpose": "Digunakan khusus untuk eksperimen pemilihan konfigurasi chunking (experiment_chunking.py)"
+    },
+    "calibration_queries": {
+      "count": 10,
+      "purpose": "Digunakan khusus untuk kalibrasi ambang batas OOD similarity (5 ID + 5 OOD)"
+    },
+    "held_out_evaluation_queries": {
+      "count": 35,
+      "purpose": "Kumpulan kueri uji independen final held-out (23 ID + 12 OOD)"
+    }
+  },
+  "development_tuning_queries": [
+    {
+      "query_id": "DEV_01",
+      "query": "Berapa gram batas konsumsi garam per hari untuk orang sehat?",
+      "expected_source_ids": [
+        "PEDOMAN-GIZI-SEIMBANG-2014"
+      ],
+      "category": "menu_planning",
+      "query_type": "in_domain"
+    },
+    {
+      "query_id": "DEV_02",
+      "query": "Suhu penyimpanan daging ayam mentah di chiller agar tidak basi",
+      "expected_source_ids": [
+        "SOP-STORAGE-COLD-2026",
+        "SOP-WASTE-2026-001"
+      ],
+      "category": "food_storage",
+      "query_type": "in_domain"
+    },
+    {
+      "query_id": "DEV_03",
+      "query": "Cara mengolah sisa kulit umbi wortel menjadi kaldu sayur bening",
+      "expected_source_ids": [
+        "SOP-WASTE-UPCYCLING-2026",
+        "SOP-WASTE-2026-001"
+      ],
+      "category": "food_waste",
+      "query_type": "in_domain"
+    },
+    {
+      "query_id": "DEV_04",
+      "query": "Kandungan protein tempe kedelai per 100 gram",
+      "expected_source_ids": [
+        "REF-PANGAN-TKPI-2019"
+      ],
+      "category": "food_composition",
+      "query_type": "in_domain"
+    },
+    {
+      "query_id": "DEV_05",
+      "query": "Aturan rotasi stok bahan First-Expired-First-Out di gudang dapur",
+      "expected_source_ids": [
+        "SOP-INVENTORY-FEFO-2026"
+      ],
+      "category": "inventory_management",
+      "query_type": "in_domain"
+    },
+    {
+      "query_id": "DEV_06",
+      "query": "Daftar alergen yang wajib diinformasikan pada label makanan kemasan",
+      "expected_source_ids": [
+        "REG-BPOM-ALERGEN-2018"
+      ],
+      "category": "allergen_management",
+      "query_type": "in_domain"
+    },
+    {
+      "query_id": "DEV_07",
+      "query": "Berapa kebutuhan energi harian pria dewasa 20 tahun?",
+      "expected_source_ids": [
+        "REG-GIZI-AKG-2019"
+      ],
+      "category": "nutritional_standards",
+      "query_type": "in_domain"
+    },
+    {
+      "query_id": "DEV_08",
+      "query": "Rentang suhu bahaya pertumbuhan kuman pada makanan matang",
+      "expected_source_ids": [
+        "SOP-HACCP-SAFETY-2026"
+      ],
+      "category": "food_safety",
+      "query_type": "in_domain"
+    },
+    {
+      "query_id": "DEV_09",
+      "query": "Standar gramatur porsi nasi dan lauk ayam untuk katering",
+      "expected_source_ids": [
+        "SOP-CATERING-PORTION-2026"
+      ],
+      "category": "catering_operations",
+      "query_type": "in_domain"
+    },
+    {
+      "query_id": "DEV_10",
+      "query": "Makanan berkarbohidrat indeks glikemik rendah untuk penderita diabetes",
+      "expected_source_ids": [
+        "PANDUAN-DIET-DIABETES-2023"
+      ],
+      "category": "nutritional_standards",
+      "query_type": "in_domain"
+    },
+    {
+      "query_id": "DEV_11",
+      "query": "Ciri fisik daging sapi yang sudah mulai membusuk dan berlendir",
+      "expected_source_ids": [
+        "SOP-SENSORY-AUDIT-2026"
+      ],
+      "category": "food_safety",
+      "query_type": "in_domain"
+    },
+    {
+      "query_id": "DEV_12",
+      "query": "Berapa persen kerugian ekonomi akibat sampah makanan di Indonesia?",
+      "expected_source_ids": [
+        "PEDOMAN-FLW-BAPPENAS-2021"
+      ],
+      "category": "food_waste",
+      "query_type": "in_domain"
+    },
+    {
+      "query_id": "DEV_13",
+      "query": "Rasio substitusi daging sapi ke tempe menurut daftar bahan penukar",
+      "expected_source_ids": [
+        "SOP-SUBSTITUSI-PROTEIN-2026"
+      ],
+      "category": "ingredient_substitution",
+      "query_type": "in_domain"
+    },
+    {
+      "query_id": "DEV_14",
+      "query": "Berapa lama waktu simmering kaldu tulang ayam pekat?",
+      "expected_source_ids": [
+        "SOP-WASTE-UPCYCLING-2026"
+      ],
+      "category": "food_waste",
+      "query_type": "in_domain"
+    },
+    {
+      "query_id": "DEV_15",
+      "query": "Cara pengukuran sisa makanan pasien dengan skala Comstock",
+      "expected_source_ids": [
+        "PEDOMAN-KEMENKES-PGRS-2013"
+      ],
+      "category": "catering_operations",
+      "query_type": "in_domain"
+    }
+  ],
+  "calibration_queries": [
+    {
+      "query_id": "CALIB_01",
+      "query": "Berapa batasan anjuran konsumsi gula, garam, dan lemak harian (G4 G1 L5)?",
+      "expected_source_ids": [
+        "PEDOMAN-GIZI-SEIMBANG-2014"
+      ],
+      "category": "menu_planning",
+      "query_type": "in_domain"
+    },
+    {
+      "query_id": "CALIB_02",
+      "query": "Berapa spesifikasi suhu operasional untuk ruang walk-in chiller penyimpanan?",
+      "expected_source_ids": [
+        "SOP-STORAGE-COLD-2026",
+        "SOP-WASTE-2026-001"
+      ],
+      "category": "food_storage",
+      "query_type": "in_domain"
+    },
+    {
+      "query_id": "CALIB_03",
+      "query": "Mengapa bahan kedaluwarsa dekat harus diposisikan paling depan rak?",
+      "expected_source_ids": [
+        "SOP-INVENTORY-FEFO-2026"
+      ],
+      "category": "inventory_management",
+      "query_type": "in_domain"
+    },
+    {
+      "query_id": "CALIB_04",
+      "query": "Berapa gram protein dalam 100g dada ayam fillet tanpa kulit?",
+      "expected_source_ids": [
+        "REF-PANGAN-TKPI-2019"
+      ],
+      "category": "food_composition",
+      "query_type": "in_domain"
+    },
+    {
+      "query_id": "CALIB_05",
+      "query": "Mengapa minyak jelantah bekas goreng kepiting tidak boleh untuk menu bebas alergen?",
+      "expected_source_ids": [
+        "REG-BPOM-ALERGEN-2018"
+      ],
+      "category": "allergen_management",
+      "query_type": "in_domain"
+    },
+    {
+      "query_id": "CALIB_06",
+      "query": "Bagaimana cara konfigurasi gateway BGP routing pada perangkat router jaringan?",
+      "expected_source_ids": [],
+      "category": "out_of_distribution",
+      "query_type": "out_of_distribution"
+    },
+    {
+      "query_id": "CALIB_07",
+      "query": "Berapa panjang lintasan lari atletik standar olimpiade di stadion?",
+      "expected_source_ids": [],
+      "category": "out_of_distribution",
+      "query_type": "out_of_distribution"
+    },
+    {
+      "query_id": "CALIB_08",
+      "query": "Bagaimana perhitungan tarif amortisasi aset tak berwujud menurut standar akuntansi PSAK?",
+      "expected_source_ids": [],
+      "category": "out_of_distribution",
+      "query_type": "out_of_distribution"
+    },
+    {
+      "query_id": "CALIB_09",
+      "query": "Penyebab getaran pada transmisi gardan mobil roda belakang saat kecepatan tinggi",
+      "expected_source_ids": [],
+      "category": "out_of_distribution",
+      "query_type": "out_of_distribution"
+    },
+    {
+      "query_id": "CALIB_10",
+      "query": "Prosedur hukum pengajuan kasasi sengketa tanah warisan di pengadilan negeri",
+      "expected_source_ids": [],
+      "category": "out_of_distribution",
+      "query_type": "out_of_distribution"
+    }
+  ],
+  "held_out_evaluation_queries": [
+    {
+      "query_id": "EVAL_01",
+      "query": "Berapa angka kecukupan energi dan protein harian untuk laki-laki dewasa usia 19-29 tahun menurut PMK 28/2019?",
+      "expected_source_ids": [
+        "REG-GIZI-AKG-2019"
+      ],
+      "category": "nutritional_standards",
+      "intent": "direct_factual",
+      "query_type": "in_domain"
+    },
+    {
+      "query_id": "EVAL_02",
+      "query": "Kebutuhan kalori rata-rata harian cowok usia dua puluhan tahun menurut regulasi gizi",
+      "expected_source_ids": [
+        "REG-GIZI-AKG-2019"
+      ],
+      "category": "nutritional_standards",
+      "intent": "synonym_paraphrase",
+      "query_type": "in_domain"
+    },
+    {
+      "query_id": "EVAL_03",
+      "query": "Berapa gram batas natrium maksimal per hari untuk mencegah hipertensi?",
+      "expected_source_ids": [
+        "REG-GIZI-AKG-2019",
+        "PEDOMAN-GIZI-SEIMBANG-2014",
+        "SOP-GIZI-2026-002"
+      ],
+      "category": "nutritional_standards",
+      "intent": "direct_factual",
+      "query_type": "in_domain"
+    },
+    {
+      "query_id": "EVAL_04",
+      "query": "Berapa porsi pembagian makanan pokok, lauk, dan sayuran dalam konsep piring makanku?",
+      "expected_source_ids": [
+        "PEDOMAN-GIZI-SEIMBANG-2014"
+      ],
+      "category": "menu_planning",
+      "intent": "direct_factual",
+      "query_type": "in_domain"
+    },
+    {
+      "query_id": "EVAL_05",
+      "query": "Tata cara menyusun takaran piring makan sehat siang hari agar gizi tetap seimbang",
+      "expected_source_ids": [
+        "PEDOMAN-GIZI-SEIMBANG-2014"
+      ],
+      "category": "menu_planning",
+      "intent": "synonym_paraphrase",
+      "query_type": "in_domain"
+    },
+    {
+      "query_id": "EVAL_06",
+      "query": "Perbandingan kandungan protein antara 100g daging sapi dan 100g dada ayam",
+      "expected_source_ids": [
+        "REF-PANGAN-TKPI-2019"
+      ],
+      "category": "food_composition",
+      "intent": "direct_factual",
+      "query_type": "in_domain"
+    },
+    {
+      "query_id": "EVAL_07",
+      "query": "Berapa gram protein dalam tempe dan tahu mentah berdasarkan tabel komposisi pangan?",
+      "expected_source_ids": [
+        "REF-PANGAN-TKPI-2019"
+      ],
+      "category": "food_composition",
+      "intent": "direct_factual",
+      "query_type": "in_domain"
+    },
+    {
+      "query_id": "EVAL_08",
+      "query": "Bagaimana cara menukar daging sapi dengan tempe tanpa kehilangan asupan protein?",
+      "expected_source_ids": [
+        "SOP-SUBSTITUSI-PROTEIN-2026"
+      ],
+      "category": "ingredient_substitution",
+      "intent": "direct_factual",
+      "query_type": "in_domain"
+    },
+    {
+      "query_id": "EVAL_09",
+      "query": "Bila stok daging sapi habis di gudang, bahan penukar apa yang paling hemat biaya tapi nilai nutrisinya mirip?",
+      "expected_source_ids": [
+        "SOP-SUBSTITUSI-PROTEIN-2026"
+      ],
+      "category": "ingredient_substitution",
+      "intent": "synonym_paraphrase",
+      "query_type": "in_domain"
+    },
+    {
+      "query_id": "EVAL_10",
+      "query": "Mengapa konsumsi tempe harus dipadukan dengan nasi atau serealia untuk kelengkapan asam amino?",
+      "expected_source_ids": [
+        "SOP-SUBSTITUSI-PROTEIN-2026"
+      ],
+      "category": "ingredient_substitution",
+      "intent": "ambiguous_cross_cutting",
+      "query_type": "in_domain"
+    },
+    {
+      "query_id": "EVAL_11",
+      "query": "Prosedur pemisahan meja kerja dan talenan untuk mencegah kontaminasi alergen kacang dan gluten",
+      "expected_source_ids": [
+        "REG-BPOM-ALERGEN-2018"
+      ],
+      "category": "allergen_management",
+      "intent": "direct_factual",
+      "query_type": "in_domain"
+    },
+    {
+      "query_id": "EVAL_12",
+      "query": "Apakah minyak bekas menggoreng udang boleh dipakai untuk menggoreng makanan orang yang alergi seafood?",
+      "expected_source_ids": [
+        "REG-BPOM-ALERGEN-2018"
+      ],
+      "category": "allergen_management",
+      "intent": "ambiguous_cross_cutting",
+      "query_type": "in_domain"
+    },
+    {
+      "query_id": "EVAL_13",
+      "query": "Berapa suhu internal minimal saat memasak daging ayam agar bakteri Salmonella mati?",
+      "expected_source_ids": [
+        "SOP-HACCP-SAFETY-2026",
+        "SOP-WASTE-2026-001"
+      ],
+      "category": "food_safety",
+      "intent": "direct_factual",
+      "query_type": "in_domain"
+    },
+    {
+      "query_id": "EVAL_14",
+      "query": "Berapa lama makanan basah boleh dibiarkan di suhu ruangan sebelum harus dibuang?",
+      "expected_source_ids": [
+        "SOP-HACCP-SAFETY-2026"
+      ],
+      "category": "food_safety",
+      "intent": "synonym_paraphrase",
+      "query_type": "in_domain"
+    },
+    {
+      "query_id": "EVAL_15",
+      "query": "Urutan penataan rak chiller vertikal dari atas ke bawah untuk mencegah kontaminasi daging mentah",
+      "expected_source_ids": [
+        "SOP-STORAGE-COLD-2026"
+      ],
+      "category": "food_storage",
+      "intent": "direct_factual",
+      "query_type": "in_domain"
+    },
+    {
+      "query_id": "EVAL_16",
+      "query": "Berapa suhu ideal untuk ruang walk-in chiller dan berapa suhu freezer beku daging?",
+      "expected_source_ids": [
+        "SOP-STORAGE-COLD-2026",
+        "SOP-WASTE-2026-001"
+      ],
+      "category": "food_storage",
+      "intent": "direct_factual",
+      "query_type": "in_domain"
+    },
+    {
+      "query_id": "EVAL_17",
+      "query": "Apa perbedaan penerapan metode FEFO dan FIFO dalam pengelolaan stok dapur?",
+      "expected_source_ids": [
+        "SOP-INVENTORY-FEFO-2026",
+        "SOP-WASTE-2026-001"
+      ],
+      "category": "inventory_management",
+      "intent": "direct_factual",
+      "query_type": "in_domain"
+    },
+    {
+      "query_id": "EVAL_18",
+      "query": "Kriteria apa saja yang mewajibkan staf penerimaan barang untuk menolak daging dari supplier?",
+      "expected_source_ids": [
+        "SOP-INVENTORY-FEFO-2026"
+      ],
+      "category": "inventory_management",
+      "intent": "direct_factual",
+      "query_type": "in_domain"
+    },
+    {
+      "query_id": "EVAL_19",
+      "query": "Berapa ton perkiraan sampah makanan (food loss and waste) di Indonesia menurut kajian Bappenas?",
+      "expected_source_ids": [
+        "PEDOMAN-FLW-BAPPENAS-2021"
+      ],
+      "category": "food_waste",
+      "intent": "direct_factual",
+      "query_type": "in_domain"
+    },
+    {
+      "query_id": "EVAL_20",
+      "query": "Sebutkan tingkatan aksi penanganan sisa makanan dalam hirarki food recovery",
+      "expected_source_ids": [
+        "PEDOMAN-FLW-BAPPENAS-2021"
+      ],
+      "category": "food_waste",
+      "intent": "direct_factual",
+      "query_type": "in_domain"
+    },
+    {
+      "query_id": "EVAL_21",
+      "query": "Bagaimana cara membuat kaldu dari sisa potongan kulit wortel dan batang seledri?",
+      "expected_source_ids": [
+        "SOP-WASTE-UPCYCLING-2026",
+        "SOP-WASTE-2026-001"
+      ],
+      "category": "food_waste",
+      "intent": "direct_factual",
+      "query_type": "in_domain"
+    },
+    {
+      "query_id": "EVAL_22",
+      "query": "Cara memanfaatkan roti tawar yang hampir expired menjadi crouton dan tepung roti",
+      "expected_source_ids": [
+        "SOP-WASTE-UPCYCLING-2026"
+      ],
+      "category": "food_waste",
+      "intent": "synonym_paraphrase",
+      "query_type": "in_domain"
+    },
+    {
+      "query_id": "EVAL_23",
+      "query": "Berapa standar maksimal persentase sisa makanan pasien yang tidak termakan menurut SPM Kemenkes?",
+      "expected_source_ids": [
+        "PEDOMAN-KEMENKES-PGRS-2013"
+      ],
+      "category": "catering_operations",
+      "intent": "direct_factual",
+      "query_type": "in_domain"
+    },
+    {
+      "query_id": "EVAL_24",
+      "query": "Bagaimana cara menginstal docker engine dan minikube di Ubuntu 24?",
+      "expected_source_ids": [],
+      "category": "out_of_distribution",
+      "intent": "out_of_distribution",
+      "query_type": "out_of_distribution"
+    },
+    {
+      "query_id": "EVAL_25",
+      "query": "Bagaimana sintaks penulisan indexing b-tree pada PostgreSQL untuk mempercepat query select?",
+      "expected_source_ids": [],
+      "category": "out_of_distribution",
+      "intent": "out_of_distribution",
+      "query_type": "out_of_distribution"
+    },
+    {
+      "query_id": "EVAL_26",
+      "query": "Bagaimana cara mengukur pembelokan cahaya di sekitar lubang hitam menurut relativitas umum Einstein?",
+      "expected_source_ids": [],
+      "category": "out_of_distribution",
+      "intent": "out_of_distribution",
+      "query_type": "out_of_distribution"
+    },
+    {
+      "query_id": "EVAL_27",
+      "query": "Cara mengatur izin permission runtime kamera pada aplikasi Android dengan Kotlin",
+      "expected_source_ids": [],
+      "category": "out_of_distribution",
+      "intent": "out_of_distribution",
+      "query_type": "out_of_distribution"
+    },
+    {
+      "query_id": "EVAL_28",
+      "query": "Kapan wasit sepak bola memutuskan penalti akibat pelanggaran handball di kotak terlarang?",
+      "expected_source_ids": [],
+      "category": "out_of_distribution",
+      "intent": "out_of_distribution",
+      "query_type": "out_of_distribution"
+    },
+    {
+      "query_id": "EVAL_29",
+      "query": "Bagaimana prosedur pelaporan SPT tahunan pajak badan usaha di formulir 1771 e-filing pajak?",
+      "expected_source_ids": [],
+      "category": "out_of_distribution",
+      "intent": "out_of_distribution",
+      "query_type": "out_of_distribution"
+    },
+    {
+      "query_id": "EVAL_30",
+      "query": "Langkah-langkah mengganti minyak rem dan bleeding master silinder pada rem cakram sepeda motor",
+      "expected_source_ids": [],
+      "category": "out_of_distribution",
+      "intent": "out_of_distribution",
+      "query_type": "out_of_distribution"
+    },
+    {
+      "query_id": "EVAL_31",
+      "query": "Metode analisis beban gempa pada konstruksi balok beton bertulang menggunakan software ETABS",
+      "expected_source_ids": [],
+      "category": "out_of_distribution",
+      "intent": "out_of_distribution",
+      "query_type": "out_of_distribution"
+    },
+    {
+      "query_id": "EVAL_32",
+      "query": "Teknik fiksasi internal pemasangan pen pada fraktur collum femoris ortopedi lansia",
+      "expected_source_ids": [],
+      "category": "out_of_distribution",
+      "intent": "out_of_distribution",
+      "query_type": "out_of_distribution"
+    },
+    {
+      "query_id": "EVAL_33",
+      "query": "Progresi akord modulasi nada dari tangga nada C mayor ke G mayor pada komposisi musik klasik",
+      "expected_source_ids": [],
+      "category": "out_of_distribution",
+      "intent": "out_of_distribution",
+      "query_type": "out_of_distribution"
+    },
+    {
+      "query_id": "EVAL_34",
+      "query": "Aturan kerning dan leading tipografi dalam desain poster editorial dengan Adobe InDesign",
+      "expected_source_ids": [],
+      "category": "out_of_distribution",
+      "intent": "out_of_distribution",
+      "query_type": "out_of_distribution"
+    },
+    {
+      "query_id": "EVAL_35",
+      "query": "Ketentuan batas pesangon pemutusan hubungan kerja karyawan tetap menurut UU Cipta Kerja",
+      "expected_source_ids": [],
+      "category": "out_of_distribution",
+      "intent": "out_of_distribution",
+      "query_type": "out_of_distribution"
+    }
+  ]
+}
